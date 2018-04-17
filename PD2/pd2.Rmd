@@ -1,0 +1,827 @@
+---
+title: "Raport PD2"
+author: "Jadwiga Słowik"
+date: "6 kwietnia 2017"
+output:
+  html_document: default
+width: 1000
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+source("Slowik_Jadwiga_268811_pd2.R")
+library("pander") # do ladnego wyswietlania outputu z microbenchmarka
+```
+
+```{r helpers, echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
+porownaj_czasy <- function(index) {
+  suppressWarnings(microbenchmark::microbenchmark(
+    sqldf=rozwiazanie_sqldf[[index]](),
+    base=rozwiazanie_bazowe[[index]](),
+    dplyr=rozwiazanie_dplyr[[index]]()
+  ))
+}
+
+ramka_z_porownaniem_parametrow <- function(rozwiazania, rodzajeRozwiazan) {
+  data.frame("nrow" = unlist(lapply(rozwiazania, nrow)),
+             "ncol" = unlist(lapply(rozwiazania, ncol)),
+             row.names=rodzajeRozwiazan
+             )
+}
+
+pokaz_tabelke_z_porownaniem_parametrow <- function(index) {
+  knitr::kable(ramka_z_porownaniem_parametrow(
+    list(rozwiazanie_sqldf[[index]](), rozwiazanie_bazowe[[index]](), rozwiazanie_dplyr[[index]]()),
+    c("sqldf", "base", "dplyr")
+  ))
+}
+  
+pokaz_tabelke_z_benchmarkiem <- function(index) {
+  suppressMessages(
+  suppressWarnings(
+    pander(porownaj_czasy(index))))
+}
+
+pokaz_tabelke_z_rozw <- function(rozwiazanie) {
+  suppressMessages(
+    suppressWarnings(
+      pander(head(suppressWarnings(rozwiazanie), 20))
+    )
+  )
+}
+
+```
+
+# Zapytanie nr 1
+`SELECT DISTINCT engine FROM planes`
+
+## Implementacje
+
+### base
+```{r}
+print(rozwiazanie_bazowe[["1"]])
+```
+
+### sqldf
+```{r}
+print(rozwiazanie_sqldf[["1"]])
+```
+
+### dplyr
+```{r}
+print(rozwiazanie_dplyr[["1"]])
+```
+
+## Porównanie wydajności dla poszczególnych rozwiązań
+
+```{r pp, echo=FALSE, warning=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_benchmarkiem("1")
+```
+
+## Porównanie liczby kolumn i wierszy
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+suppressWarnings(pokaz_tabelke_z_porownaniem_parametrow("1"))
+```
+
+## Wypisanie pierwszych $\leqslant$ $20$ wierszy
+### sqldf
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_sqldf[["1"]]())
+```
+### base
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_bazowe[["1"]]())
+```
+### dplyr
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_dplyr[["1"]]())
+```
+
+# Zapytanie nr 2
+`SELECT DISTINCT type, manufacture FROM planes`
+
+## Implementacje
+
+### base
+```{r}
+print(rozwiazanie_bazowe[["2"]])
+```
+
+### sqldf
+```{r}
+print(rozwiazanie_sqldf[["2"]])
+```
+
+### dplyr
+```{r}
+print(rozwiazanie_dplyr[["2"]])
+```
+
+
+## Porównanie wydajności dla poszczególnych rozwiązań
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_benchmarkiem("2")
+```
+
+## Porównanie liczby kolumn i wierszy
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_porownaniem_parametrow("2")
+```
+
+## Wypisanie pierwszych $\leqslant$ $20$ wierszy
+### sqldf
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_sqldf[["2"]]())
+```
+### base
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_bazowe[["2"]]())
+```
+### dplyr
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_dplyr[["2"]]())
+```
+
+
+# Zapytanie nr 3
+`SELECT COUNT(*), engine FROM planes GROUP BY engine`
+
+## Implementacje
+
+### base
+```{r}
+print(rozwiazanie_bazowe[["3"]])
+```
+
+### sqldf
+```{r}
+print(rozwiazanie_sqldf[["3"]])
+```
+
+### dplyr
+```{r}
+print(rozwiazanie_dplyr[["3"]])
+```
+
+
+## Porównanie wydajności dla poszczególnych rozwiązań
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_benchmarkiem("3")
+```
+
+## Porównanie liczby kolumn i wierszy
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_porownaniem_parametrow("3")
+```
+
+## Wypisanie pierwszych $\leqslant$ $20$ wierszy
+### sqldf
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_sqldf[["3"]]())
+```
+### base
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_bazowe[["3"]]())
+```
+### dplyr
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_dplyr[["3"]]())
+```
+
+# Zapytanie nr 4
+`SELECT COUNT(*), engine, type FROM planes GROUP BY engine, type`
+
+## Implementacje
+
+### base
+```{r}
+print(rozwiazanie_bazowe[["4"]])
+```
+
+Drugie rozwiązanie:
+
+```{r}
+print(II_rozwiazanie_bazowe_4)
+```
+
+### sqldf
+```{r}
+print(rozwiazanie_sqldf[["4"]])
+```
+
+### dplyr
+```{r}
+print(rozwiazanie_dplyr[["4"]])
+```
+
+
+## Porównanie wydajności dla poszczególnych rozwiązań
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_benchmarkiem("4")
+```
+
+## Porównanie liczby kolumn i wierszy
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_porownaniem_parametrow("4")
+```
+
+## Wypisanie pierwszych $\leqslant$ $20$ wierszy
+### sqldf
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_sqldf[["4"]]())
+```
+### base
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_bazowe[["4"]]())
+```
+### dplyr
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_dplyr[["4"]]())
+```
+
+# Zapytanie nr 5
+`SELECT MIN(year), AVG(year), MAX(year), engine, manufacturer FROM planes GROUP BY engine, manufacturer`
+
+## Implementacje
+
+### base
+```{r}
+print(rozwiazanie_bazowe[["5"]])
+```
+
+### sqldf
+```{r}
+print(rozwiazanie_sqldf[["5"]])
+```
+
+### dplyr
+```{r}
+print(rozwiazanie_dplyr[["5"]])
+```
+
+
+## Porównanie wydajności dla poszczególnych rozwiązań
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_benchmarkiem("5")
+```
+
+## Porównanie liczby kolumn i wierszy
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_porownaniem_parametrow("5")
+```
+
+## Wypisanie pierwszych $\leqslant$ $20$ wierszy
+### sqldf
+```{r a, echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_sqldf[["5"]]())
+```
+### base
+```{r b, echo=FALSE, message=FALSE, collapse=FALSE, cache=TRUE}
+head(rozwiazanie_dplyr[["5"]](), 20)
+```
+### dplyr
+```{r d, echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(suppressWarnings(rozwiazanie_dplyr[["5"]]()))
+```
+
+# Zapytanie nr 6
+`SELECT * FROM planes WHERE speed IS NOT NULL`
+
+## Implementacje
+
+### base
+```{r}
+print(rozwiazanie_bazowe[["6"]])
+```
+
+### sqldf
+```{r}
+print(rozwiazanie_sqldf[["6"]])
+```
+
+### dplyr
+```{r}
+print(rozwiazanie_dplyr[["6"]])
+```
+
+
+## Porównanie wydajności dla poszczególnych rozwiązań
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_benchmarkiem("6")
+```
+
+## Porównanie liczby kolumn i wierszy
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_porownaniem_parametrow("6")
+```
+
+## Wypisanie pierwszych $\leqslant$ $20$ wierszy
+### sqldf
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_sqldf[["6"]]())
+```
+### base
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_bazowe[["6"]]())
+```
+### dplyr
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_dplyr[["6"]]())
+```
+
+# Zapytanie nr 7
+`SELECT tailnum, seats, year FROM planes WHERE seats BETWEEN 100 AND 200 AND year >= 2010`
+
+## Implementacje
+
+### base
+```{r}
+print(rozwiazanie_bazowe[["7"]])
+```
+
+### sqldf
+```{r}
+print(rozwiazanie_sqldf[["7"]])
+```
+
+### dplyr
+```{r}
+print(rozwiazanie_dplyr[["7"]])
+```
+
+
+## Porównanie wydajności dla poszczególnych rozwiązań
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_benchmarkiem("7")
+```
+
+## Porównanie liczby kolumn i wierszy
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_porownaniem_parametrow("7")
+```
+
+## Wypisanie pierwszych $\leqslant$ $20$ wierszy
+### sqldf
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_sqldf[["7"]]())
+```
+### base
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_bazowe[["7"]]())
+```
+### dplyr
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_dplyr[["7"]]())
+```
+
+# Zapytanie nr 8
+`SELECT * FROM planes WHERE manufacturer IN ("BOEING", "AIRBUS", "EMBRAER") AND seats>300`
+
+## Implementacje
+
+### base
+```{r}
+print(rozwiazanie_bazowe[["8"]])
+```
+
+### sqldf
+```{r}
+print(rozwiazanie_sqldf[["8"]])
+```
+
+### dplyr
+```{r}
+print(rozwiazanie_dplyr[["8"]])
+```
+
+
+## Porównanie wydajności dla poszczególnych rozwiązań
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_benchmarkiem("8")
+```
+
+## Porównanie liczby kolumn i wierszy
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_porownaniem_parametrow("8")
+```
+
+## Wypisanie pierwszych $\leqslant$ $20$ wierszy
+### sqldf
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_sqldf[["8"]]())
+```
+### base
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_bazowe[["8"]]())
+```
+### dplyr
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_dplyr[["8"]]())
+```
+
+# Zapytanie nr 9
+`SELECT manufacturer, COUNT(*) FROM planes WHERE seats > 200 GROUP BY manufacturer`
+
+## Implementacje
+
+### base
+```{r}
+print(rozwiazanie_bazowe[["9"]])
+```
+
+Drugie rozwiązanie:
+
+```{r}
+print(II_rozwiazanie_bazowe_9)
+```
+
+### sqldf
+```{r}
+print(rozwiazanie_sqldf[["9"]])
+```
+
+### dplyr
+```{r}
+print(rozwiazanie_dplyr[["9"]])
+```
+
+
+## Porównanie wydajności dla poszczególnych rozwiązań
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_benchmarkiem("9")
+```
+
+## Porównanie liczby kolumn i wierszy
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_porownaniem_parametrow("9")
+```
+
+## Wypisanie pierwszych $\leqslant$ $20$ wierszy
+### sqldf
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_sqldf[["9"]]())
+```
+### base
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_bazowe[["9"]]())
+```
+### dplyr
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_dplyr[["9"]]())
+```
+
+# Zapytanie nr 10
+`SELECT manufacturer, COUNT(*) FROM planes GROUP BY manufacturer HAVING COUNT(*) > 10`
+
+## Implementacje
+
+### base
+```{r}
+print(rozwiazanie_bazowe[["10"]])
+```
+
+Drugie rozwiązanie:
+
+```{r}
+print(II_rozwiazanie_bazowe_10)
+```
+
+### sqldf
+```{r}
+print(rozwiazanie_sqldf[["10"]])
+```
+
+### dplyr
+```{r}
+print(rozwiazanie_dplyr[["10"]])
+```
+
+
+## Porównanie wydajności dla poszczególnych rozwiązań
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_benchmarkiem("10")
+```
+
+## Porównanie liczby kolumn i wierszy
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_porownaniem_parametrow("10")
+```
+
+## Wypisanie pierwszych $\leqslant$ $20$ wierszy
+### sqldf
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_sqldf[["10"]]())
+```
+### base
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_bazowe[["10"]]())
+```
+### dplyr
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_dplyr[["10"]]())
+```
+
+# Zapytanie nr 11
+`SELECT manufacturer, COUNT(*) FROM planes WHERE seats > 200 GROUP BY manufacturer HAVING COUNT(*) > 10`
+
+## Implementacje
+
+### base
+```{r}
+print(rozwiazanie_bazowe[["11"]])
+```
+
+### sqldf
+```{r}
+print(rozwiazanie_sqldf[["11"]])
+```
+
+### dplyr
+```{r}
+print(rozwiazanie_dplyr[["11"]])
+```
+
+
+## Porównanie wydajności dla poszczególnych rozwiązań
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_benchmarkiem("11")
+```
+
+## Porównanie liczby kolumn i wierszy
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_porownaniem_parametrow("11")
+```
+
+## Wypisanie pierwszych $\leqslant$ $20$ wierszy
+### sqldf
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_sqldf[["11"]]())
+```
+### base
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_bazowe[["11"]]())
+```
+### dplyr
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_dplyr[["11"]]())
+```
+
+# Zapytanie nr 12
+`SELECT manufacturer, COUNT(*) AS howmany FROM planes GROUP BY manufacturer ORDER BY howmany DESC LIMIT 10`
+
+## Implementacje
+
+### base
+```{r}
+print(rozwiazanie_bazowe[["12"]])
+```
+
+### sqldf
+```{r}
+print(rozwiazanie_sqldf[["12"]])
+```
+
+### dplyr
+```{r}
+print(rozwiazanie_dplyr[["12"]])
+```
+
+
+## Porównanie wydajności dla poszczególnych rozwiązań
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_benchmarkiem("12")
+```
+
+## Porównanie liczby kolumn i wierszy
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_porownaniem_parametrow("12")
+```
+
+## Wypisanie pierwszych $\leqslant$ $20$ wierszy
+### sqldf
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_sqldf[["12"]]())
+```
+### base
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_bazowe[["12"]]())
+```
+### dplyr
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_dplyr[["12"]]())
+```
+
+# Zapytanie nr 13a
+`SELECT * FROM planes WHERE year >= 2012 ORDER BY year, seats`
+
+## Implementacje
+
+### base
+```{r}
+print(rozwiazanie_bazowe[["13a"]])
+```
+
+### sqldf
+```{r}
+print(rozwiazanie_sqldf[["13a"]])
+```
+
+### dplyr
+```{r}
+print(rozwiazanie_dplyr[["13a"]])
+```
+
+
+## Porównanie wydajności dla poszczególnych rozwiązań
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_benchmarkiem("13a")
+```
+
+## Porównanie liczby kolumn i wierszy
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_porownaniem_parametrow("13a")
+```
+
+## Wypisanie pierwszych $\leqslant$ $20$ wierszy
+### sqldf
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_sqldf[["13a"]]())
+```
+### base
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_bazowe[["13a"]]())
+```
+### dplyr
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_dplyr[["13a"]]())
+```
+
+# Zapytanie nr 13b
+`SELECT * FROM planes WHERE year >= 2012 ORDER BY seats, year`
+
+## Implementacje
+
+### base
+```{r}
+print(rozwiazanie_bazowe[["13b"]])
+```
+
+### sqldf
+```{r}
+print(rozwiazanie_sqldf[["13b"]])
+```
+
+### dplyr
+```{r}
+print(rozwiazanie_dplyr[["13b"]])
+```
+
+
+## Porównanie wydajności dla poszczególnych rozwiązań
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_benchmarkiem("13b")
+```
+
+## Porównanie liczby kolumn i wierszy
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_porownaniem_parametrow("13b")
+```
+
+## Wypisanie pierwszych $\leqslant$ $20$ wierszy
+### sqldf
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_sqldf[["13b"]]())
+```
+### base
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_bazowe[["13b"]]())
+```
+### dplyr
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_dplyr[["13b"]]())
+```
+
+*Różnica pomiędzy 13a i 13b*: różnią się kolejnością ustawienia elementów. Mianowicie, w 13a elementy
+są najpierw sortwane po `year` a dopiero potem po `seats`, podczas gdy w 13b jest odwrotnie - najpierw
+liczy się wartość `seats` a dopiero w przypadku remisu -- wartość `year`.
+
+# Zapytanie nr 14
+```
+SELECT planes.*, airlines.* FROM
+ (SELECT DISTINCT carrier, tailnum FROM flights) AS cartail 
+JOIN planes ON cartail.tailnum=planes.tailnum 
+JOIN airlines ON cartail.carrier=airlines.carrier
+```
+
+## Implementacje
+
+### base
+```{r}
+print(rozwiazanie_bazowe[["14"]])
+```
+
+### sqldf
+```{r}
+print(rozwiazanie_sqldf[["14"]])
+```
+
+### dplyr
+```{r}
+print(rozwiazanie_dplyr[["14"]])
+```
+
+
+## Porównanie wydajności dla poszczególnych rozwiązań
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_benchmarkiem("14")
+```
+
+## Porównanie liczby kolumn i wierszy
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_porownaniem_parametrow("14")
+```
+
+## Wypisanie pierwszych $\leqslant$ $20$ wierszy
+### sqldf
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_sqldf[["14"]]())
+```
+### base
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_bazowe[["14"]]())
+```
+### dplyr
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_dplyr[["14"]]())
+```
+
+# Zapytanie nr 15
+
+```
+SELECT flights2.*, weather2.atemp, weather2.ahumid, weather2.apressure FROM 
+ (SELECT * FROM flights WHERE origin='EWR') AS flights2 
+LEFT JOIN 
+ (SELECT year, month, day, AVG(temp) AS atemp, 
+   AVG(humid) AS ahumid, AVG(pressure) AS apressure 
+  FROM weather WHERE origin='EWR' GROUP BY year, month, day) AS weather2 
+ON flights2.year=weather2.year 
+AND flights2.month=weather2.month 
+AND flights2.day=weather2.day
+```
+
+## Implementacje
+
+### base
+```{r}
+print(rozwiazanie_bazowe[["15"]])
+```
+
+### sqldf
+```{r}
+print(rozwiazanie_sqldf[["15"]])
+```
+
+### dplyr
+```{r}
+print(rozwiazanie_dplyr[["15"]])
+```
+
+
+## Porównanie wydajności dla poszczególnych rozwiązań
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_benchmarkiem("15")
+```
+
+## Porównanie liczby kolumn i wierszy
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_porownaniem_parametrow("15")
+```
+
+## Wypisanie pierwszych $\leqslant$ $20$ wierszy
+### sqldf
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_sqldf[["15"]]())
+```
+### base
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_bazowe[["15"]]())
+```
+### dplyr
+```{r echo=FALSE, message=FALSE, collapse=TRUE, cache=TRUE}
+pokaz_tabelke_z_rozw(rozwiazanie_dplyr[["15"]]())
+```

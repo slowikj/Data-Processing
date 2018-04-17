@@ -1,0 +1,339 @@
+---
+title: "Raport PD1"
+author: "Jadwiga Słowik"
+date: "16 marca 2017"
+output:
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+source("Slowik_Jadwiga_268811_pd1.R")
+```
+
+```{r loadLibraries, results="asis", echo=FALSE, message=FALSE, warning=FALSE}
+require(knitr)
+```
+
+# Zadanie 1
+## Dyskusja
+Pierwsze zadanie polegało na obliczeniu współczynnika korelacji Kendalla
+przy założeniu, że dane wektory będą miały unikalne wartości.
+
+Główną częścią zadania było obliczenie liczby par zgodnych. Istnieją co najmniej dwa sposoby rozwiązania tej części zadania.
+
+### Rozwiązanie 1
+Algorytm jest następujący.
+Dla każdego z wektorów $x$ i $y$ jest obliczana pośrednio lista, która na $i$-tej pozycji zawiera
+indeksy elementów w analizowanym wektorze. Elementy znajdujące się pod tymi indeksami są większe od $i$-tej wartości w danym wektorze.
+
+```
+lapply(x, function(k) which(x > k))
+lapply(y, function(k) which(y > k))
+```
+
+Wobec tego, po wykonaniu tych operacji otrzymujemy dwie listy (wektorów) indeksów.
+
+Zauważmy, że aby znaleźć wszystkie pary $(x_i,\, y_j)$ takie, że $i < j$ oraz $x_i < x_j$ lub $x_i > x_j$
+wystarczy znaleźć wszystkie pary $(x_i,\, x_j)$, gdzie $i \neq j,\, x_i < x_j$
+
+Następnie, dla każdej pozycji obliczamy część wspólną indeksów zawartych w pierwszym i drugim wektorze.
+
+```
+mapply(intersect, a, b)
+```
+Ostatecznie, obliczamy, ile łącznie ,,indeksów'' znalazło się na wynikowej (po obliczeniu przecięcia) liście.
+
+### Rozwiązanie 2
+Drugie rozwiązanie używa funkcji `outer`. Mianowicie, na początku dla każdego wektora (`x` i `y`) obliczana
+jest macierz rozmiaru `n` $\times$ `n` ($n = length(x) = length(y)$), w której komórka o adresie $(i,\, j)$ 
+przyjmuje wartość `TRUE` wtedy i tylko wtedy, gdy $x_i < x_j$ (dla drugiego wektora: $y_i < y_j$), w przeciwnym
+wypadku -- `FALSE`.
+
+Następnie, obliczana jest logiczna koniunkcja odpowiadających sobie elementów tychże macierzy. Otrzymana
+w ten sposób macierz reprezentuje wybór par indeksów, które spełniają warunki danego zadania.
+
+Jako że poszukujemy jedynie liczby par, to zliczamy, ile w wynikowej macierzy występuje komórek,
+które mają wartość `TRUE`. 
+
+### Krótkie porównanie
+Zauważmy, że w rozwiązaniu nr $2$ potrzebujemy kwadratowej pamięci względem rozmiaru wektora bez względu na to,
+ile będzie interesujących nas par. Ponadto druga faza algorytmu będzie wykonywać się szybciej w przypadku, gdy mamy dużą liczbę powtarzających się elementów.
+Również możemy mieć zysk pod względem wykorzystania pamięci, gdy użyjemy algorytmu pierwszego. 
+
+Jednakże funkcje typowo zwektoryzowane zwykle działają nieco szybciej niż funkcje typu `*apply`.
+
+## Testy
+### Test 1
+```{r}
+x <- c(1,2,3,4,5)
+y <- c(1,2,3,4,5)
+kendall(x, y)
+cor(x, y, method="kendall")
+
+```
+
+### Test 2
+```{r}
+x <- c(-1,5,2,1,33,4)
+y <- c(2,1,100,200,-200,-100)
+kendall(x, y)
+cor(x, y, method="kendall")
+```
+
+### Test 3
+```{r}
+x <- c(-1,-2,-3,-4,0,1,2,3)
+y <- c(100,-1,200,2,4,3,500,52)
+kendall(x, y)
+cor(x, y, method="kendall")
+```
+### Test 4
+```{r}
+x <- c(3,5,53,-1,-2,-3,20,21,22,13,14)
+y <- c(-1,-2,-3,-4,-5,-6,-7,-8,200,201,199)
+kendall(x, y)
+cor(x, y, method="kendall")
+```
+### Test 5
+```{r}
+x <- 1:30
+y <- seq(-1, -30, -1)
+kendall(x, y)
+cor(x, y, method="kendall")
+```
+# Zadanie 2
+## Dyskusja
+W zadaniu drugim należało obliczyć najczęściej występujacą wartość w danym wektorze (niekoniecznie liczbowym).
+
+Rozwiązanie tego zadania było następujące. Na początku obliczamy, jaka jest liczność wystąpień
+każdej wartości:
+
+```
+rle(sort(x))
+```
+
+A następnie wybieramy najliczniejszy element. Jako że może być kilka najliczniejszych elementów,
+musimy najpierw znaleźć wszystkie takie wartości stosując konstrukcję
+
+```
+a[which(a) == a]
+```
+
+A następnie wybieramy losową wartość za pomocą polecenia `sample`.
+
+##Testy
+### Ciągi liczbowe
+#### Test 1
+```{r}
+moda(c(1,2,3,3,3,1,2,3))
+```
+
+#### Test 2
+```{r}
+moda(c(1,200,3,3,3,1,2,3,300,300,300,1,1,1,1,-10))
+```
+#### Test 3
+```{r}
+moda(c(6,6,7,8,7))
+```
+
+Zgodnie z wymaganiem, jeśli jest kilka wartości, które wystąpiły w ciągu tak samo często i jest to największa 
+ilość wystąpień, to mamy podać wartość losową:
+
+#### Test 4
+```{r}
+set.seed(53)
+moda(c(1,1,1,5,5,5))
+```
+
+#### Test 5
+```{r}
+set.seed(56)
+moda(c(1,1,1,5,5,5))
+```
+
+### Ciągi logiczne
+#### Test 1
+```{r}
+moda(c(TRUE,FALSE,FALSE,FALSE,FALSE,TRUE))
+```
+#### Test 2
+```{r}
+moda(c(FALSE,TRUE,TRUE,FALSE,TRUE,TRUE,TRUE,TRUE,FALSE))
+```
+
+### Ciągi napisów
+#### Test 1
+```{r}
+moda(c("a","b","a","a","asd","a","a","b"))
+```
+```{r}
+moda(c("kot","pies","mysz","kot","kot","kot","kot","pies"))
+```
+
+# Zadanie 3
+## Dyskusja
+W zadaniu trzecim należało wygenerować pseudolosową próbkę z rozkładu dyskretnego zmiennej losowej takiego,
+że prawdopodobieństwo $x_i$ jest równe $p_i$ (dla każdego elementu $x_i$ z danego wektora).
+
+Jeśli prawdopodobieństwa nie sumowały się do wartości $1$, to wystarczyło podzielić wszystkie wartości wektora
+$p$ przez sumę jego elementów. Częsciowe sumy prawdopobieństw obliczaliśmy przy pomocy funckji `cumsum`,
+a odpowiedni indeks $m$ przy pomocy funkcji `findInterval`.
+
+## Testy
+Porównamy, jak zmieniają się ,,błędy'' prawodopobieństw wraz ze wzrostem liczby elementów w wygenerowanej próbce.
+
+```{r plotfunc, echo=FALSE}
+getFrequencies <- function(r, x)
+{
+  freq <- table(r) / length(r)
+  ordered_freq <- freq[as.character(x)]
+  ordered_freq[is.na(ordered_freq)] <- 0
+  ordered_freq <- as.vector(ordered_freq)
+  
+  ordered_freq
+}
+
+generatePlot <- function(n, x, p)
+{
+  r <- gendyskr(n, x, p)
+  ordered_freq <- getFrequencies(r, x)
+  
+  data <- structure(list(P=p, G=ordered_freq), .Names=c("P", "G"), class="data.frame", row.names=1:length(x))
+  
+  colors <- c("red", "blue")
+  title <- paste(c("n =", as.character(n)), collapse=" ")
+  barplot(t(as.matrix(data)),
+          xlab="wartości x", ylab="prawdopodobieństwo",
+          beside=TRUE,
+          col=colors, ylim=c(0,1.2),  main=title)
+  
+  legend("topright", c("Dane prawdopobieństwo p", "Proporcja wygenerowanych obserwacji"), fill=colors)
+  
+}
+
+generatePlots <- function(n, x, p)
+{
+  invisible(lapply(n, function(n) { generatePlot(n, x, p)}))
+}
+
+```
+### Test 1
+```{r}
+x <- c(1,2,3,4,5)
+p <- c(0.5, 0.1, 0.1, 0.2, 0.1)
+```
+```{r echo=FALSE, message=FALSE, collapse=TRUE}
+n <- c(5, 10, 15, 50, 100, 1000)
+generatePlots(n, x, p)
+
+```
+
+### Test 2
+```{r}
+x <- c(1,2,3,4,5,6,7,8)
+p <- c(0.1, 0.3, 0.1, 0.1, 0.2, 0.1, 0.05, 0.05)
+```
+```{r echo=FALSE}
+generatePlots(n, x, p)
+```
+
+Dochodzimy do wniosku, że wraz ze wzrostem liczby elementów w wygenerowanej próbce, proporcje wartości
+są bliższe danym prawdopodobieństwom dla każdego rodzaju elementu.
+
+# Zadanie 4
+## Dyskusja
+W zadaniu czwartym należało napisać dwie funkcje. Pierwsza z nich, `lead`, ,,usuwa'' `n` początkowych obserwacji
+z danego wektora `x` i dodaje $n$ braków na koniec wektora `x`. Rozwiązanie jest następujące. Wystarczy
+stworzyć dodatkowy wektor, który pierwotnie wypełniony jest wartościami `NA`, a następnie przypisać
+`length(x) - n` końcowych wartości z wektora `x` na początek nowego wektora.
+
+Implementacja drugiej funkcji jest analogiczna do rozwiązania przedstawionego powyżej
+
+## Testy
+### Test 1
+```{r}
+lead(c(1,2,3,4,5), 3)
+```
+### Test 2
+```{r}
+lead(c(1,2,3,4,5), 5)
+```
+### Test 3
+```{r}
+lead(c(1,2,3,4,8,2,3,4), 3)
+```
+### Test 4
+```{r}
+lag(c(1,2,5,2,3,45,3), 2)
+```
+### Test 5
+```{r}
+lag(c(1,5,3,3,3,5,2,4), 1)
+```
+### Test 6
+```{r}
+lag(c(1,2,6,3,333,5,2,1,-2), 6)
+```
+
+# Zadanie 5
+
+## Dyskusja
+Zadanie piąte polegało na wyznaczeniu wartości dystrybuanty empirycznej dla `x` we wszystkich punktach z wektora `y`.
+
+### Rozwiązanie pierwsze
+Pierwsze rozwiązanie polega na naiwnym obliczaniu dla każdego punktu z wektora `y`, ile jest wartości w wektorze `x`
+mniejszych bądź równych od aktualnie analizowanej wartości. Złożoność takiego rozwiązania jest względnie duża,
+mianowicie wynosi ona $O\,(n \cdot m)$ (gdzie $n = length(x)$, $m = length(y)$), gdyż dla każdego elementu
+z wektora `y` musimy przejść przez wszystkie elementu wektora `x`.
+
+### Rozwiązanie drugie
+Na początku obliczamy liczność każdej wartości występującej w wektorze `x` przy pomocy następującego polecenia:
+```
+rle(sort(x))
+```
+(Możnaby było tego dokonać również za pomocą funkcji `table`).
+
+Dla każdej wartości wektora `y` znajdujemy, ile unikalnych liczb jest mniejszych bądź równych tej wartości:
+```
+ind <- findInterval(y, c(-Inf, unique(x)))
+```
+Dopisujemy ,,sztuczną'' wartość `-Inf`, aby otrzymać zawsze otrzymać dodatni indeks przedziału. Wobec tego,
+otrzymamy w wyniku powyższej operacji zawsze wartości o $1$ większe, ale taki właśnie wynik będzie dla nas użyteczny
+w kolejnym kroku (przy odwoływaniu się do konkretnych miejsc innej tablicy).
+
+W następnym kroku, obliczamy ile jest w wektorze `x` łącznie liczb mniejszych bądź równych danej wartości z `y`
+(tzn. uwzględniamy również powtórzenia). Możemy tego dokonać w następujący sposób. Obliczamy częściowe sumy (`cumsum`)
+dla wektora `rle(sort(x))$lengths` (i dopisujemy na początek 0, abyśmy nie musieli oddzielnie rozpatrywać przypadku,
+w którym nie ma żadnej liczby mniejszej bądź równej danej liczbie z wektora `y`). Naszym ostatecznym wynikiem
+jest wartość znajdująca się pod indeksem `ind` w wektorze sum częściowych.
+
+Zauważmy, że tak zaimplementowane rozwiązanie jest wydajniejsze od rozwiązania pierwszego. Jako że liczby
+oznaczające początki/końce przedziałów są posortowane, to dla każdego elementu z wektora `y` możemy znaleźć
+odpowiadający mu przedział w czasie logarytmicznym względem liczby unikalnych elementów w wektorze `x`.
+Złożoność obliczeniowa przedstawionego powyżej rozwiązania wynosi $O(log(length(unique(x))) \cdot length(y) + length(x) \cdot log(length(x)))$, gdyż numery przedziałów są znajdowane za pomocą przeszukiwania binarnego.
+
+W szczególności, powinniśmy zauważyć znaczące przyspieszenie w momencie, gdy powtarza się dużo wartości
+w wektorze `x`.
+
+## Testy
+### Przykładowe wywołanie
+```{r}
+x <- c(1,1,6,2,3,3,3,5,5)
+y <- seq(1, 6, 0.1)
+roz2 <- Fn(x, y)
+roz1 <- Fn_roz1(x, y)
+roz2
+all(roz1 == roz2)
+```
+
+### Przykładowy wykres
+```{r}
+set.seed(53)
+y <- seq(-10, 10, 0.2)
+x <- rnorm(10, 0, 4)
+```
+```{r, echo=FALSE}
+plot(y, Fn(x, y), sub="Wykres dystrybuanty", type="o")
+```
